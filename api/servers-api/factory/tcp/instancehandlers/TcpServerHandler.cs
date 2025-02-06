@@ -11,6 +11,8 @@ namespace servers_api.factory.tcp.instancehandlers
 		{
 			_logger = logger;
 		}
+
+		// TODO используй метод waitForClientAsync в классе tcp server instance
 		public async Task WaitForClientAsync(
 			TcpListener listener,
 			int BusResponseWaitTimeMs,
