@@ -7,6 +7,8 @@ using servers_api.models.internallayer.instance;
 using System.Text;
 using servers_api.services.brokers.bpmintegration;
 using servers_api.models.queues;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace servers_api.factory.tcp.instances
 {
@@ -94,21 +96,109 @@ namespace servers_api.factory.tcp.instances
 		{
 			try
 			{
+				_ = _rabbitMqQueueListener.StartListeningAsync("test_queue", cancellationToken);
+
 				using var stream = client.GetStream();
 				var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
 
-				int counter = 0;
 				while (!cancellationToken.IsCancellationRequested && client.Connected)
 				{
-					string message = $"SSE event {counter++}: {DateTime.Now:HH:mm:ss}";
-					await writer.WriteLineAsync(message);
-					_logger.LogInformation($"Отправлено клиенту: {message}");
-					await Task.Delay(2000, cancellationToken); // Отправка каждые 2 секунды
+					var elements = _rabbitMqQueueListener.GetCollectedMessages();
+
+					if (elements.Count == 0)
+					{
+						await Task.Delay(1000, cancellationToken);
+						continue;
+					}
+
+					foreach (var message in elements)
+					{
+						string formattedJson = FormatJson(message.Message);
+						await writer.WriteLineAsync(formattedJson);
+						_logger.LogInformation("Отправлено клиенту:\n{Json}", formattedJson);
+						await Task.Delay(2000, cancellationToken);
+					}
 				}
 			}
 			catch (Exception ex)
 			{
 				_logger.LogWarning("Ошибка при отправке SSE сообщений: {Message}", ex.Message);
+			}
+		}
+
+		private string FormatJson(string json)
+		{
+			try
+			{
+				// Десериализуем JSON в объект
+				using var doc = JsonDocument.Parse(json);
+				var options = new JsonSerializerOptions
+				{
+					WriteIndented = true,
+					Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+				};
+
+				// Преобразуем объект в строку с отступами и декодированием unicode
+				using var ms = new MemoryStream();
+				using (var writer = new Utf8JsonWriter(ms, new JsonWriterOptions { Indented = true }))
+				{
+					WriteFormattedJson(doc.RootElement, writer);
+				}
+
+				// Преобразуем байты в строку
+				var formattedJson = Encoding.UTF8.GetString(ms.ToArray());
+
+				// Декодируем Unicode-escape в строках
+				return DecodeUnicodeEscape(formattedJson);
+			}
+			catch
+			{
+				return json; // Если JSON невалидный, просто вернуть как есть
+			}
+		}
+
+		private string DecodeUnicodeEscape(string input)
+		{
+			// Декодируем все Unicode escape символы
+			return Regex.Replace(input, @"\\u([0-9a-fA-F]{4})", match =>
+			{
+				return char.ConvertFromUtf32(int.Parse(match.Groups[1].Value, System.Globalization.NumberStyles.HexNumber));
+			});
+		}
+
+		private void WriteFormattedJson(JsonElement element, Utf8JsonWriter writer)
+		{
+			if (element.ValueKind == JsonValueKind.Object)
+			{
+				writer.WriteStartObject();
+				foreach (var property in element.EnumerateObject())
+				{
+					writer.WritePropertyName(property.Name);
+					if (property.Name.Equals("Timestamp", StringComparison.OrdinalIgnoreCase) &&
+						property.Value.ValueKind == JsonValueKind.String &&
+						DateTime.TryParse(property.Value.GetString(), out var timestamp))
+					{
+						writer.WriteStringValue(timestamp.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"));
+					}
+					else
+					{
+						WriteFormattedJson(property.Value, writer);
+					}
+				}
+				writer.WriteEndObject();
+			}
+			else if (element.ValueKind == JsonValueKind.Array)
+			{
+				writer.WriteStartArray();
+				foreach (var item in element.EnumerateArray())
+				{
+					WriteFormattedJson(item, writer);
+				}
+				writer.WriteEndArray();
+			}
+			else
+			{
+				element.WriteTo(writer);
 			}
 		}
 	}
