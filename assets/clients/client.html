@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Менеджер настройки интеграции</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f4f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        /* Основной контейнер для центровки */
+        #mainContainer {
+            display: flex;
+            gap: 20px; /* Добавляем промежуток между панелями */
+            justify-content: center; /* Панели располагаются рядом */
+            padding: 20px; /* Отступы вокруг */
+            width: 100%;
+            align-items: stretch; /* Панели растягиваются по высоте в зависимости от контента */
+        }
+
+        /* Стили для панелей */
+        #configPanel, #testManagerPanel {
+            max-width: 500px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 45%; /* Ограничиваем ширину каждой панели */
+            box-sizing: border-box; /* Учитывает padding в общей ширине */
+            display: flex;
+            flex-direction: column;
+            align-items: left;
+            text-align: left;
+            
+            /* Панели растягиваются по высоте в зависимости от контента */
+            flex-grow: 1; /* Панели могут растягиваться по высоте, если необходимо */
+            height: auto; /* Автоматическая высота */
+        }
+
+        label {
+            color: #4a5568;
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+            text-align: left;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #3182ce;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        button:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+        }
+        .checkbox-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            width: 100%; /* Занимает всю ширину */
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px; /* Отступ между меткой и полями ввода */
+            width: 100%;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .host-port-input {
+            display: flex;
+            width: 100%; /* Растягивает на всю ширину контейнера */
+            gap: 8px; /* Отступ между полями */
+            margin-bottom: 5px;
+        }
+
+        .host-port-input input[type="text"],
+        .host-port-input input[type="number"] {
+            flex: 1; /* Равномерно растягивает оба поля по ширине */
+        }
+        .description {
+            font-size: 0.9em;
+            color: #555;
+            text-align: left;
+            margin-top: 5px;
+            width: 100%; /* Убедиться, что описание растянуто по ширине */
+        }
+
+        .custom-file {
+            width: auto;
+            margin-top: 10px;
+        }
+
+        .custom-file button {
+            background-color: #4a5568;
+            margin-top: 0;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        /* Стиль для улучшенных уведомлений */
+        .notification {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.5s;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            border: 1px solid #cbd5e0;
+        }
+
+        .notification.success {
+            background-color: #e6fffa;
+            color: #38a169;
+            border-color: #81e6d9;
+        }
+
+        .notification.error {
+            background-color: #fff5f5;
+            color: #e53e3e;
+            border-color: #feb2b2;
+        }
+    </style>
+</head>
+<body>
+    <div id="mainContainer">
+        <div id="configPanel">
+            <h2>Менеджер настройки интеграции</h2>
+
+            <form id="configForm">
+                <label for="companyName">Название компании:</label>
+                <input type="text" id="companyName" placeholder="Введите название компании" required>
+
+                <label for="protocol">Протокол подключения:</label>
+                <select id="protocol" required>
+                    <option value="TCP">TCP</option>
+                    <option value="UDP">UDP</option>
+                </select>
+
+                <label for="formatSelector">Формат файла:</label>
+                <select id="formatSelector">
+                    <option value="json">JSON</option>
+                    <option value="xml">XML</option>
+                </select>
+
+                <!-- Кнопка для загрузки файла и выбор файла -->
+                <button type="button" onclick="document.getElementById('modelFile').click()">Выберите файл</button>
+                <input type="file" id="modelFile" accept=".json, .xml" required onchange="fileSelected()" style="display:none;">
+
+                <label>Тип клиент-серверной интеграции:</label>
+                <div>
+                    <div class="checkbox-container">
+                        <div class="checkbox-label">
+                            <input type="checkbox" id="client" onchange="toggleOption('client')">
+                            <span>Client</span>
+                        </div>
+                        <div class="host-port-input" id="serverFields">
+                            <input type="text" placeholder="127.0.0.1" id="serverHost" />
+                            <input type="number" placeholder="5001" id="serverPort" />
+                        </div>
+                        <div class="description">
+                            Input host and port of your server, and we will configure our node as a client and try to connect to your server.
+                        </div>
+                    </div>
+                
+                    <div class="checkbox-container">
+                        <div class="checkbox-label">
+                            <input type="checkbox" id="server" onchange="toggleOption('server')">
+                            <span>Server</span>
+                        </div>
+                        <div class="description">
+                            Our dynamic gateway will be configured as a remote server.
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" onclick="testServerConnection()">Тестировать соединение с сервером</button>
+                <button type="button" onclick="generateConfigFile()">Сформировать файл конфигурации</button>
+                <button type="button" id="configureBtn" disabled onclick="configureIntegration()">Конфигурировать интеграцию</button>
+            </form>
+
+            <!-- Уведомление -->
+            <div id="notification" class="notification"></div>
+        </div>
+        <div id="testManagerPanel">
+            <h2>Менеджер тестирования интеграции</h2>
+            <label for="messageCount">Количество отправляемых сообщений:</label>
+            <input type="number" id="messageCount" name="messageCount" min="1" value="100"> <p></p>
+            <label for="interval">Интервал отправки сообщений (в секундах):</label>
+            <input type="number" id="interval" name="interval" min="1" value="3">
+            <label for="protocol">Протокол:</label>
+            <select id="protocol" name="protocol">
+                <option value="tcp">TCP</option>
+                <option value="http">UDP</option>
+            </select>
+            <p>Выберите протокол для отправки сообщений.</p>
+        
+            <div>
+                <button id="startTestButton" onclick="startTest()">Начать тест</button>
+            </div>
+        
+            <div id="statusMessage" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+    <script>
+        let configurationFile = null;
+        const apiUrl = "https://localhost:7275/api/servers";
+        const pingUrl = "https://localhost:7275/api/servers/ping";
+
+        document.getElementById("modelFile").addEventListener("change", async function () {
+            const file = this.files[0];
+            const selectedFormat = document.getElementById("formatSelector").value;
+
+            if (!file) {
+                showNotification("Файл не выбран", false);
+                return;
+            }
+
+            // Проверка, соответствует ли файл выбранному формату
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            if ((selectedFormat === "json" && fileExtension !== "json") || 
+                (selectedFormat === "xml" && fileExtension !== "xml")) {
+                showNotification(`Выбран ${selectedFormat.toUpperCase()} формат, но файл имеет расширение .${fileExtension}`, false);
+                return;
+            }
+
+            // Уведомляем пользователя о соответствии формата
+            showNotification(`Выбран ${selectedFormat.toUpperCase()} формат`, true);
+
+            // Активируем кнопку конфигурации после успешного выбора файла
+            document.getElementById("configureBtn").disabled = false;
+
+            // Обработка JSON и XML будет здесь
+        });
+
+        function showNotification(message, success) {
+            const notification = document.getElementById("notification");
+            notification.textContent = message;
+            notification.style.color = success ? "green" : "red";
+        }
+
+        function fileSelected() {
+            showNotification("Новый файл успешно подгружен. Переформируйте файл конфигурации.", true);
+        }
+
+        function toggleOption(selectedOption) {
+            const isClient = document.getElementById('client').checked;
+            const isServer = document.getElementById('server').checked;
+            const serverFields = document.getElementById('serverFields');
+
+            if (selectedOption === 'client') {
+                if (isClient) {
+                    document.getElementById('server').checked = false;
+                    serverFields.style.display = 'flex';
+                    showNotification("Выбрана клиентская конфигурация. Проверьте хост и порт. И сформируйте файл.", false);
+                } else {
+                    serverFields.style.display = 'none';
+                }
+            } else if (selectedOption === 'server') {
+                if (isServer) {
+                    document.getElementById('client').checked = false;
+                    serverFields.style.display = 'none';
+                    showNotification("Выбрана серверная конфигурация. Сформируйте файл..", false);
+                }
+            }
+        }
+
+        async function generateConfigFile() {
+            const companyName = document.getElementById('companyName').value.trim();
+            const protocol = document.getElementById('protocol').value;
+            const modelFile = document.getElementById('modelFile').files[0];
+            const isClient = document.getElementById('client').checked;
+            const isServer = document.getElementById('server').checked;
+            const serverHost = document.getElementById('serverHost').value.trim();
+            const serverPort = document.getElementById('serverPort').value.trim();
+            const selectedFormat = document.getElementById("formatSelector").value;
+
+            const validationError = validateInputs(companyName, protocol, modelFile, isClient, isServer, serverHost, serverPort);
+            if (validationError) {
+                alert(validationError);
+                return;
+            }
+
+            try {
+                const modelContent = await modelFile.text();
+                let modelData = parseModelData(modelContent, selectedFormat);
+
+                // Заполнение глобальной переменной `configurationFile`
+                configurationFile = {
+                    protocol: protocol,
+                    model: modelData,
+                    companyName: companyName,
+                    dataFormat: selectedFormat,
+                    dataOptions: {
+                        client: isClient,
+                        server: isServer,
+                        serverDetails: isClient ? {
+                            host: serverHost || null,
+                            port: serverPort || null
+                        } : null
+                    }
+                };
+
+                document.getElementById('configureBtn').disabled = false;
+                showNotification("Конфигурация успешно создана", true);
+                console.log(JSON.stringify(configurationFile, null, 2));
+
+            } catch (error) {
+                console.error("Ошибка при обработке файла:", error);
+            }
+        }
+
+        async function configureIntegration() {
+            if (!configurationFile) {
+                alert("Сначала создайте файл конфигурации.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiUrl}/upload`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(configurationFile)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Ошибка сервера: ${response.status}`);
+                }
+
+                const result = await response.json();
+                showNotification("Конфигурация прошла успешно", true);
+            } catch (error) {
+                console.error(error);
+                showNotification("Ошибка конфигурации", false);
+            }
+        }
+
+
+        // Функция валидации данных
+        function validateInputs(companyName, protocol, modelFile, isClient, isServer, serverHost, serverPort) {
+            if (!companyName || !protocol || !modelFile) {
+                return 'Заполните все обязательные поля: название компании, протокол и файл модели.';
+            }
+
+            if (!(isClient || isServer)) {
+                return 'Выберите один тип данных: Client или Server.';
+            }
+
+            if (isClient && (!serverHost || !serverPort)) {
+                return 'Для Client необходимо указать хост и порт сервера.';
+            }
+
+            return null; // Все проверки пройдены
+        }
+
+        // Функция парсинга модели в зависимости от выбранного формата
+        function parseModelData(modelContent, format) {
+            let modelData;
+            if (format === "json") {
+                modelData = JSON.parse(modelContent); // если JSON, парсим как объект
+            } else if (format === "xml") {
+                modelData = modelContent; // если XML, сохраняем как строку
+            }
+            return modelData;
+        }
+
+
+        async function configureIntegration() {
+            if (!configurationFile) {
+                alert("Сначала создайте файл конфигурации.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiUrl}/upload`, {  // Обратите внимание на правильный синтаксис строки с использованием `${}`
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(configurationFile)  // Отправка данных конфигурации
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Ошибка сервера: ${response.status}`);
+                }
+
+                const result = await response.json();
+                showNotification("Конфигурация прошла успешно", true);  // Показываем уведомление об успешной настройке
+            } catch (error) {
+                console.error(error);  // Выводим ошибку в консоль для диагностики
+                showNotification("Ошибка конфигурации", false);  // Показываем ошибку на UI
+            }
+        }
+        
+        async function testServerConnection() {
+            try {
+                const response = await fetch(pingUrl);
+                if (response.ok) {
+                    showNotification("Соединение успешно", true);
+                } else {
+                    showNotification("Соединение не удалось", false);
+                }
+            } catch (error) {
+                showNotification("Ошибка подключения к серверу", false);
+            }
+        }
+
+        function showNotification(message, isSuccess) {
+            const notification = document.getElementById("notification");
+            notification.textContent = message;
+            notification.classList.add(isSuccess ? "success" : "error");
+            notification.style.opacity = 1;
+
+            setTimeout(() => {
+                notification.style.opacity = 0;
+                notification.classList.remove(isSuccess ? "success" : "error");
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

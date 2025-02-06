@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>Client 1: Webhook Trigger</h1>
+    <button onclick="sendWebhook()">Send Webhook</button>
+
+    <script>
+        async function sendWebhook() {
+            console.log("Attempting to send webhook...");
+
+            const startTime = Date.now();
+            try {
+                const response = await fetch("http://localhost:5001/trigger-webhook", { method: "POST" });
+                const duration = Date.now() - startTime;
+
+                if (response.ok) {
+                    console.log(`Webhook sent to Server 2 successfully. Duration: ${duration}ms`);
+                } else {
+                    console.error(`Failed to send webhook. Status: ${response.status}. Duration: ${duration}ms`);
+                }
+            } catch (error) {
+                console.error("Error sending webhook:", error);
+            }
+        }
+    </script>
+</body>
+</html>

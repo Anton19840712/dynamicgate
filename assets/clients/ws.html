@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Client</title>
+</head>
+<body>
+    <h1>WebSocket Client</h1>
+    <input type="text" id="messageInput" placeholder="Введите сообщение">
+    <button onclick="sendMessage()">Отправить</button>
+    <div id="messages"></div>
+
+    <script>
+        let socket = new WebSocket("ws://localhost:5000/ws/");
+
+        socket.onopen = function() {
+            console.log("Соединение установлено.");
+            addMessage("Соединение установлено.");
+        };
+
+        socket.onmessage = function(event) {
+            console.log("Получено сообщение:", event.data);
+            addMessage("Сервер: " + event.data);
+        };
+
+        socket.onclose = function(event) {
+            if (event.wasClean) {
+                addMessage("Соединение закрыто.");
+            } else {
+                addMessage("Соединение прервано.");
+            }
+            console.log("Код: " + event.code + " причина: " + event.reason);
+        };
+
+        socket.onerror = function(error) {
+            console.log("Ошибка: " + error.message);
+        };
+
+        function sendMessage() {
+            let message = document.getElementById("messageInput").value;
+            if (message) {
+                socket.send(message);
+                addMessage("Клиент: " + message);
+            }
+        }
+
+        function addMessage(message) {
+            const messagesDiv = document.getElementById("messages");
+            const newMessage = document.createElement("div");
+            newMessage.textContent = message;
+            messagesDiv.appendChild(newMessage);
+        }
+    </script>
+</body>
+</html>

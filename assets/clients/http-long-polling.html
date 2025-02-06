@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Long Polling Client</title>
+</head>
+<body>
+    <h1>Long Polling Client</h1>
+    <button id="connectBtn">Connect to Server</button>
+    <div id="consoleOutput"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const connectBtn = document.getElementById("connectBtn");
+            let isConnected = false;
+
+            function logMessage(message) {
+                console.log(message);
+            }
+
+            async function startLongPolling() {
+    const serverUrl = "http://localhost:57910/get-data";
+
+    while (isConnected) {
+        try {
+            const response = await fetch(serverUrl);
+
+            if (response.ok) {
+                const messages = await response.json(); // Обработка ответа JSON
+
+                // Проверяем, получили ли мы пустой массив
+                if (messages.length === 0) {
+                    logMessage("Нет новых данных."); // Сообщение об отсутствии данных
+                } else {
+                    messages.forEach(message => logMessage(`Получены данные: ${message}`));
+                }
+            } else {
+                logMessage(`Ошибка: ${response.status}`);
+            }
+        } catch (error) {
+            logMessage(`Ошибка подключения: ${error.message}`);
+            isConnected = false;
+            connectBtn.textContent = "Connect to Server";
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 5000));
+    }
+}
+
+
+
+
+            connectBtn.addEventListener("click", () => {
+                if (isConnected) {
+                    isConnected = false;
+                    connectBtn.textContent = "Connect to Server";
+                } else {
+                    isConnected = true;
+                    connectBtn.textContent = "Disconnect from Server";
+                    startLongPolling();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

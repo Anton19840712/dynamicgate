@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE Client</title>
+</head>
+<body>
+    <h1>SSE Client</h1>
+    <button id="connectButton" onclick="toggleConnection()">Connect to Server</button>
+    <button id="pingButton" onclick="pingServer()">Ping Server</button> <!-- Кнопка для пинга -->
+    <div id="pingResponse"></div> <!-- Место для отображения ответа пинга -->
+
+    <script>
+        let evtSource;
+
+        function toggleConnection() {
+            const connectButton = document.getElementById('connectButton');
+
+            if (evtSource) {
+                // Отключаемся
+                console.log('Disconnecting from server...');
+                evtSource.close();
+                evtSource = null;
+                connectButton.textContent = 'Connect to Server';
+                console.log('Disconnected from server');
+            } else {
+                // Подключаемся
+                console.log('Connecting to server...');
+                connectToServer();
+                connectButton.textContent = 'Disconnect from Server';
+            }
+        }
+
+        function connectToServer() {
+            const serverUrl = 'http://localhost:52799/sse';
+            evtSource = new EventSource(serverUrl);
+
+            evtSource.onmessage = (e) => {
+                console.log('Received:', e.data);
+            };
+
+            evtSource.onerror = (e) => {
+                console.error('SSE error:', e);
+                evtSource.close();
+                evtSource = null; // Убедитесь, что evtSource обнуляется при ошибке
+                document.getElementById('connectButton').textContent = 'Connect to Server';
+            };
+
+            window.addEventListener('beforeunload', () => {
+                if (evtSource) {
+                    evtSource.close();
+                }
+            });
+        }
+
+        function pingServer() {
+            fetch('https://localhost:7160/api/ping') // Используйте https для вашего API
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok ' + response.statusText);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    document.getElementById('pingResponse').innerText = `Ping Response: ${data}`; // Отображаем ответ
+                    console.log('Ping response:', data);
+                })
+                .catch(error => {
+                    console.error('Ping error:', error);
+                });
+        }
+    </script>
+</body>
+</html>

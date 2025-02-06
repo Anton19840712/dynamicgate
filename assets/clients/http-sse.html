@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocol Simulator</title>
+</head>
+<body>
+    <h1>Protocol Selector</h1>
+    <p>Choose protocol to send a message:</p>
+    <select id="protocolSelect" onchange="toggleInputFields()">
+        <option value="http">HTTP</option>
+        <option value="https">HTTPS</option>
+        <option value="sse">SSE</option>
+    </select>
+    <input type="text" id="messageInput" placeholder="Enter message" />
+    <button id="sendButton" onclick="sendMessage()">Send</button>
+    <button id="connectButton" onclick="toggleConnection()" style="display:none;">Connect to Server</button>
+    <p id="status"></p> <!-- Параграф для отображения статуса подключения -->
+
+    <script>
+        let evtSource; // Переменная для EventSource
+
+        function toggleInputFields() {
+            const protocol = document.getElementById('protocolSelect').value;
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            const connectButton = document.getElementById('connectButton');
+
+            if (protocol === 'sse') {
+                messageInput.style.display = 'none';
+                sendButton.style.display = 'none';
+                connectButton.style.display = 'inline-block';
+                connectButton.textContent = 'Connect to Server'; // Reset button text
+            } else {
+                messageInput.style.display = 'inline-block';
+                sendButton.style.display = 'inline-block';
+                connectButton.style.display = 'none';
+                document.getElementById("status").textContent = ""; // Сбрасываем статус
+            }
+        }
+
+        async function sendMessage() {
+            const protocol = document.getElementById('protocolSelect').value;
+            const message = document.getElementById('messageInput').value;
+
+            if (!message.trim()) {
+                console.error('Message cannot be empty');
+                return; // Прекращаем выполнение функции, если сообщение пустое
+            }
+
+            console.log('Message sent:', message); // Вывод отправленного сообщения
+
+            let serverUrl;
+            switch (protocol) {
+                case 'http':
+                    serverUrl = 'http://localhost:5277/api/messages';
+                    break;
+                case 'https':
+                    serverUrl = 'https://localhost:7008/api/messages';
+                    break;
+                case 'sse':
+                    serverUrl = 'http://localhost:52799/sse'; // SSE
+                    break;
+                default:
+                    console.log('Unknown protocol');
+                    return; // Прекращаем выполнение функции
+            }
+
+            try {
+                // Отправка POST-запроса только для HTTP/HTTPS
+                if (protocol === 'http' || protocol === 'https') {
+                    const response = await fetch(serverUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message })
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                } else if (protocol === 'sse') {
+                    // Подключаемся к серверу через SSE
+                    connectToServer();
+                }
+            } catch (error) {
+                console.error('Error occurred during request:', error);
+            }
+        }
+
+        function toggleConnection() {
+            const connectButton = document.getElementById('connectButton');
+
+            if (evtSource) {
+                // Disconnect
+                evtSource.close();
+                evtSource = null;
+                connectButton.textContent = 'Connect to Server'; // Change button text back
+                console.log(`Disconnected from server at ${new Date().toLocaleString()}`);
+                document.getElementById("status").textContent = "Disconnected from server.";
+            } else {
+                // Connect
+                connectToServer();
+                connectButton.textContent = 'Disconnect from Server'; // Change button text
+            }
+        }
+
+        function connectToServer() {
+            const serverUrl = 'http://localhost:52799/sse'; // SSE URL
+            evtSource = new EventSource(serverUrl);
+
+            evtSource.onopen = () => {
+                const connectedTime = new Date().toLocaleString();
+                console.log(`Соединение с сервером установлено (SSE открыто) в ${connectedTime}`);
+                document.getElementById("status").textContent = `Connected to server at ${connectedTime}.`;
+                console.info('Connected to server: SSE connection established.');
+            };
+
+            evtSource.onmessage = (e) => {
+                console.log('Received:', e.data); // Лог полученного сообщения
+            };
+
+            evtSource.onerror = (e) => {
+                const disconnectedTime = new Date().toLocaleString();
+                if (e.readyState === EventSource.CLOSED) {
+                    console.error(`Соединение с сервером разорвано (SSE закрыт сервером) в ${disconnectedTime}`);
+                    document.getElementById("status").textContent = `Connection lost (server closed) at ${disconnectedTime}.`;
+                } else {
+                    console.error(`Ошибка SSE, сервер недоступен: ${e} в ${disconnectedTime}`);
+                    document.getElementById("status").textContent = `Error: Server not accessible at ${disconnectedTime}.`;
+                }
+                console.warn('Lost connection to server: SSE connection interrupted.');
+                evtSource.close(); // Закрываем соединение при ошибке
+            };
+
+            window.addEventListener('beforeunload', () => {
+                if (evtSource) {
+                    const exitTime = new Date().toLocaleString();
+                    evtSource.close(); // Закрываем соединение при закрытии страницы
+                    console.log(`Соединение закрыто при закрытии страницы в ${exitTime}`);
+                    document.getElementById("status").textContent = `Connection closed upon page exit at ${exitTime}.`;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

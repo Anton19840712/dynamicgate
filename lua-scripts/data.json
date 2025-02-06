@@ -1,0 +1,20 @@
+{
+    "protocol": "TCP",
+    "dataFormat": "json",
+    "companyName": "corporation",
+    "model": {
+        "InternalModel": "{\"shipmentId\":\"12345\",\"destination\":\"New York\",\"weightKg\":250,\"status\":\"In Transit\",\"estimatedDelivery\":\"2025-01-25\"}"
+    },
+    "QueuesNames": {
+        "InQueueName": "corporation_in",
+        "OutQueueName": "corporation_out"
+    },
+    "dataOptions": {
+        "client": true,
+        "server": false,
+        "serverDetails": {
+            "host": "127.0.0.1",
+            "port": 5018
+        }
+    }
+}

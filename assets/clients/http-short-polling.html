@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Short Polling Client</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <h1>Short Polling Client</h1>
+    <button id="connectBtn">Connect to Server</button>
+    <input type="number" id="intervalInput" placeholder="Интервал в секундах" min="1" value="5" />
+    <input type="number" id="durationInput" placeholder="Время отключения в секундах" min="1" value="30" />
+    <div id="consoleOutput"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const connectBtn = document.getElementById("connectBtn");
+            const intervalInput = document.getElementById("intervalInput");
+            const durationInput = document.getElementById("durationInput");
+
+            let isConnected = false;
+            let requestCount = 0; // Счётчик запросов
+
+            // Функция для логирования сообщений в консоль
+            function logMessage(message) {
+                console.log(message); // Выводим сообщение в консоль
+            }
+
+            // Функция для долгого опроса
+            async function startLongPolling() {
+                const serverUrl = "http://localhost:57910/get-data"; // URL вашего сервера
+                logMessage("Подключение к серверу...");
+
+                // Устанавливаем интервал и общее время ожидания в миллисекундах
+                const interval = parseInt(intervalInput.value) * 1000; 
+                const totalDuration = parseInt(durationInput.value) * 1000; 
+                const startTime = Date.now();
+
+                while (isConnected) {
+                    try {
+                        requestCount++; // Увеличиваем счётчик запросов
+                        const response = await fetch(serverUrl);
+
+                        // Проверяем, был ли запрос успешным
+                        if (response.ok) {
+                            const data = await response.text();
+
+                            // Если данные не пустые, логируем их
+                            if (data.trim() !== "") {
+                                const formattedTime = new Date().toLocaleString('en-US', {
+                                    hour: 'numeric',
+                                    minute: 'numeric',
+                                    second: 'numeric',
+                                    hour12: true,
+                                });
+                                logMessage(`Запрос #${requestCount}: Получены новые данные: ${data} Время получения: ${formattedTime}`);
+                            } else {
+                                logMessage(`Запрос #${requestCount}: Нет новых данных.`); // Если данные пустые
+                            }
+                        } else if (response.status === 204) {
+                            logMessage(`Запрос #${requestCount}: Нет новых данных (статус 204).`);
+                        }
+
+                        // Ожидание перед следующим запросом
+                        await new Promise(resolve => setTimeout(resolve, interval));
+
+                        // Проверка, не истекло ли время ожидания
+                        if (Date.now() - startTime >= totalDuration) {
+                            logMessage("Время ожидания истекло. Клиент отключился от сервера.");
+                            isConnected = false; // Завершаем опрос
+                        }
+                    } catch (error) {
+                        logMessage(`Запрос #${requestCount}: Ошибка: ${error.message}`);
+                        isConnected = false; // Отключаемся при ошибке
+                    }
+                }
+
+                connectBtn.textContent = "Connect to Server"; // Изменяем текст кнопки при отключении
+            }
+
+            // Обработка нажатия кнопки
+            connectBtn.addEventListener("click", () => {
+                if (isConnected) {
+                    isConnected = false;
+                    connectBtn.textContent = "Connect to Server"; // Изменяем текст кнопки при отключении вручную
+                } else {
+                    isConnected = true;
+                    requestCount = 0; // Сбрасываем счётчик при новом подключении
+                    connectBtn.textContent = "Disconnect from Server"; // Изменяем текст кнопки при подключении
+                    startLongPolling();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
