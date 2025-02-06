@@ -73,6 +73,7 @@ public class Program
 {
 	public static async Task Main(string[] args)
 	{
+		Console.Title = "tcp-test-client";
 		using var host = Host.CreateDefaultBuilder(args)
 			.ConfigureServices(services =>
 			{

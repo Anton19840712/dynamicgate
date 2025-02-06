@@ -10,6 +10,7 @@ class Program
 
 	static async Task Main()
 	{
+		Console.Title = "pusher";
 		var factory = new ConnectionFactory { HostName = RabbitMqHost };
 		using var connection = factory.CreateConnection();
 		using var channel = connection.CreateModel();
