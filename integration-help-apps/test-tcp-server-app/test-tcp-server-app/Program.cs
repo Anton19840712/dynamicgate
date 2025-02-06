@@ -21,6 +21,7 @@ class Program
 
 	static async Task HandleClientAsync(TcpClient client)
 	{
+		Console.Title = "outside server";
 		using (client)
 		using (var stream = client.GetStream())
 		{
