@@ -4,7 +4,7 @@ using System.Text;
 
 class Program
 {
-	const int Port = 5018;
+	const int Port = 6254;
 	static async Task Main()
 	{
 		var listener = new TcpListener(IPAddress.Any, Port);
