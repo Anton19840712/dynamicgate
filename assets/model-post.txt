@@ -1,0 +1,47 @@
+{
+  "protocol": "TCP",
+  "dataFormat": "json",
+  "companyName": "corporation",
+  "model": {
+    "InternalModel": {
+      "shipmentId": "12345",
+      "destination": "New York",
+      "weightKg": 250,
+      "status": "In Transit",
+      "estimatedDelivery": "2025-01-25"
+    }
+  },
+  "dataOptions": {
+    "client": false,
+    "server": true,
+    "serverDetails": {
+      "host": "127.0.0.1",
+      "port": 6254
+    },
+    "clientDetails": {
+      "host": "127.0.0.1",
+      "port": 5018
+    }
+  },
+  "connectionSettings": {
+    "clientSettings": {
+      "attemptsToFindExternalServer": 3,
+      "retryDelayMs" : 5,
+      "connectionTimeoutMs": 5000,
+      "attemptsToFindBus": 3,
+      "busResponseWaitTimeMs": 3000,
+      "busProcessingTimeMs": 10000,
+      "busReconnectDelayMs": 5000,
+      "busIdleTimeoutMs": 3000
+    },
+    "serverSettings": {
+      "attemptsToFindBus": 3,
+      "retryDelayMs" : 5,
+      "busResponseWaitTimeMs": 3000,
+      "busProcessingTimeMs": 10000,
+      "busReconnectDelayMs": 5000,
+      "busIdleTimeoutMs": 3000,
+      "clientHoldConnectionMs": 15000
+    }
+  }
+}
