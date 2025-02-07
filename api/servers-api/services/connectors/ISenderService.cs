@@ -1,5 +1,5 @@
 ﻿using servers_api.models.internallayer.common;
-using servers_api.models.responces;
+using servers_api.models.response;
 
 namespace servers_api.Services.Connectors
 {
@@ -8,7 +8,7 @@ namespace servers_api.Services.Connectors
 	/// </summary>
 	public interface ISenderService
 	{
-		Task<ResponceIntegration> UpAsync(
+		Task<ResponseIntegration> UpAsync(
 			CombinedModel parsedModel,
 			CancellationToken stoppingToken);
 	}

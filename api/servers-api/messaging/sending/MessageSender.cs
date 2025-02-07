@@ -1,9 +1,9 @@
 ﻿using System.Net.Sockets;
 using System.Text;
-using servers_api.messaginghandlers.formatting;
+using servers_api.messaging.formatting;
 using servers_api.services.brokers.bpmintegration;
 
-namespace servers_api.messaginghandlers.sending
+namespace servers_api.messaging.sending
 {
 	public class MessageSender : IMessageSender
 	{

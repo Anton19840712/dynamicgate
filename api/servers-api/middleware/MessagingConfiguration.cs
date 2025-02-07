@@ -1,6 +1,6 @@
 ﻿using Serilog;
-using servers_api.messaginghandlers.formatting;
-using servers_api.messaginghandlers.sending;
+using servers_api.messaging.formatting;
+using servers_api.messaging.sending;
 
 namespace servers_api.middleware
 {

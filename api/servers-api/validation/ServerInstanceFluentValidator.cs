@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
 using servers_api.models.internallayer.instance;
-using servers_api.models.responces;
+using servers_api.models.response;
 using servers_api.validation;
 
 public class ServerInstanceFluentValidator : IServerInstanceFluentValidator
@@ -17,7 +17,7 @@ public class ServerInstanceFluentValidator : IServerInstanceFluentValidator
 		_logger = logger;
 	}
 
-	public ResponceIntegration Validate(ServerInstanceModel instanceModel)
+	public ResponseIntegration Validate(ServerInstanceModel instanceModel)
 	{
 		ValidationResult result = _validator.Validate(instanceModel);
 
@@ -28,7 +28,7 @@ public class ServerInstanceFluentValidator : IServerInstanceFluentValidator
 				_logger.LogError(error.ErrorMessage);
 			}
 
-			return new ResponceIntegration
+			return new ResponseIntegration
 			{
 				Message = string.Join("; ", result.Errors.Select(e => e.ErrorMessage)),
 				Result = false

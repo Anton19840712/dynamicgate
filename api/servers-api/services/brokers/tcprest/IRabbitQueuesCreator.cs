@@ -1,4 +1,4 @@
-﻿using servers_api.models.responces;
+﻿using servers_api.models.response;
 
 namespace servers_api.services.brokers.tcprest
 {
@@ -7,6 +7,6 @@ namespace servers_api.services.brokers.tcprest
 	/// </summary>
 	public interface IRabbitQueuesCreator
 	{
-		Task<ResponceIntegration> CreateQueuesAsync(string inQueue, string outQueue);
+		Task<ResponseIntegration> CreateQueuesAsync(string inQueue, string outQueue);
 	}
 }

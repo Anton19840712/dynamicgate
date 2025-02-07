@@ -1,7 +1,7 @@
 ﻿using System.Text;
-using servers_api.models.responces;
+using servers_api.models.response;
 
-namespace servers_api.servicehandlers
+namespace servers_api.handlers
 {
 	/// <summary>
 	/// Класс занимается валидацией результатов каждого из процессов настройки интеграции.
@@ -17,13 +17,13 @@ namespace servers_api.servicehandlers
 		/// <param name="pushTask">Результат задачи обучения BPM</param>
 		/// <param name="receiveTask">Результат задачи получения данных из BPM</param>
 		/// <returns>Список объектов ResponceIntegration с результатами каждого процесса</returns>
-		public List<ResponceIntegration> GenerateResultMessage(
-					ResponceIntegration queueCreationTask = null,
-					ResponceIntegration senderConnectionTask = null,
-					ResponceIntegration pushTask = null,
-					ResponceIntegration receiveTask = null)
+		public List<ResponseIntegration> GenerateResultMessage(
+					ResponseIntegration queueCreationTask = null,
+					ResponseIntegration senderConnectionTask = null,
+					ResponseIntegration pushTask = null,
+					ResponseIntegration receiveTask = null)
 		{
-			var results = new List<(string ProcessName, ResponceIntegration Response)>
+			var results = new List<(string ProcessName, ResponseIntegration Response)>
 			{
 				("Сервис создания очередей брокера", queueCreationTask),
 				("Сервис запуска соединения согласно выбранного протокола", senderConnectionTask),
@@ -32,7 +32,7 @@ namespace servers_api.servicehandlers
 			};
 
 			// Создаем список для хранения результатов каждого процесса
-			var responseList = new List<ResponceIntegration>();
+			var responseList = new List<ResponseIntegration>();
 
 			foreach (var (processName, response) in results)
 			{
@@ -54,7 +54,7 @@ namespace servers_api.servicehandlers
 				}
 
 				// Добавляем результат в список
-				responseList.Add(new ResponceIntegration
+				responseList.Add(new ResponseIntegration
 				{
 					Result = response?.Result ?? false, // Успех процесса
 					Message = resultMessage.ToString()   // Сообщение о результате процесса

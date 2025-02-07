@@ -2,7 +2,7 @@
 using servers_api.factory.abstractions;
 using servers_api.models.internallayer.common;
 using servers_api.models.internallayer.instance;
-using servers_api.models.responces;
+using servers_api.models.response;
 using servers_api.Services.Connectors;
 
 public class SenderService : ISenderService
@@ -21,7 +21,7 @@ public class SenderService : ISenderService
 		_mapper = mapper;
 	}
 
-	public async Task<ResponceIntegration> UpAsync(CombinedModel parsedModel, CancellationToken stoppingToken)
+	public async Task<ResponseIntegration> UpAsync(CombinedModel parsedModel, CancellationToken stoppingToken)
 	{
 		_logger.LogInformation(
 			"Запуск UpAsync метода с протоколом: {Protocol}, роль: Сервер - {IsServer}, Клиент - {IsClient}",
@@ -53,7 +53,7 @@ public class SenderService : ISenderService
 			return responceIntegration;
 		}
 
-		return new ResponceIntegration
+		return new ResponseIntegration
 		{
 			Message = "Настройка протокола не была завершена успешно",
 			Result = false

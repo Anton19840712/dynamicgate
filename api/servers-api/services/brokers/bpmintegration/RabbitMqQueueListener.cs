@@ -1,9 +1,9 @@
 ﻿using RabbitMQ.Client.Events;
 using RabbitMQ.Client;
-using servers_api.models.responces;
 using System.Text;
 using servers_api.services.brokers.bpmintegration;
 using System.Collections.Concurrent;
+using servers_api.models.response;
 
 /// <summary>
 /// RabbitMqQueueListener с использованием промежуточной конкурентной коллекции с накоплением сообщений и последующей выдачей в созданный объект сервера.
@@ -17,7 +17,7 @@ public class RabbitMqQueueListener : IRabbitMqQueueListener
 	private IConnection _connection;
 	private IModel _channel;
 	private string _queueName;
-	private readonly ConcurrentQueue<ResponceIntegration> _collectedMessages = new();
+	private readonly ConcurrentQueue<ResponseIntegration> _collectedMessages = new();
 
 	public RabbitMqQueueListener(IConnectionFactory connectionFactory, ILogger<RabbitMqQueueListener> logger)
 	{
@@ -61,7 +61,7 @@ public class RabbitMqQueueListener : IRabbitMqQueueListener
 
 		_logger.LogInformation("Получено сообщение из очереди {Queue}: {Message}", _queueName, message);
 
-		_collectedMessages.Enqueue(new ResponceIntegration { Message = message, Result = true });
+		_collectedMessages.Enqueue(new ResponseIntegration { Message = message, Result = true });
 
 		return Task.CompletedTask;
 	}
@@ -73,9 +73,9 @@ public class RabbitMqQueueListener : IRabbitMqQueueListener
 		_logger.LogInformation("Слушатель {Queue} остановлен", _queueName);
 	}
 
-	public List<ResponceIntegration> GetCollectedMessages()
+	public List<ResponseIntegration> GetCollectedMessages()
 	{
-		var messagesList = new List<ResponceIntegration>();
+		var messagesList = new List<ResponseIntegration>();
 		while (_collectedMessages.TryDequeue(out var message))
 		{
 			messagesList.Add(message);

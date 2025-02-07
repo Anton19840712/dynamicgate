@@ -3,7 +3,7 @@ using System.Text;
 using servers_api.factory.abstractions;
 using servers_api.models.internallayer.instance;
 using servers_api.models.outbox;
-using servers_api.models.responces;
+using servers_api.models.response;
 using servers_api.repositories;
 
 public class TcpClientInstance : IUpClient
@@ -21,7 +21,7 @@ public class TcpClientInstance : IUpClient
 		_outboxRepository = outboxRepository ?? throw new ArgumentNullException(nameof(outboxRepository));
 	}
 
-	public async Task<ResponceIntegration> ConnectToServerAsync(
+	public async Task<ResponseIntegration> ConnectToServerAsync(
 		ClientInstanceModel instanceModel,
 		string serverHost,
 		int serverPort,
@@ -46,7 +46,7 @@ public class TcpClientInstance : IUpClient
 				// Успешное подключение
 				_logger.LogInformation($"Подключение к {serverHost}:{serverPort} установлено.");
 				_ = Task.Run(MonitorConnectionAsync, _cts.Token);
-				return new ResponceIntegration { Message = "Успешное подключение", Result = true };
+				return new ResponseIntegration { Message = "Успешное подключение", Result = true };
 			}
 
 			// Лаконичное сообщение при неудаче
@@ -60,7 +60,7 @@ public class TcpClientInstance : IUpClient
 			{
 				// Обработка отмены операции (если задача отменена извне)
 				_logger.LogInformation("Попытка подключения была отменена.");
-				return new ResponceIntegration { Message = "Попытка подключения была отменена", Result = false };
+				return new ResponseIntegration { Message = "Попытка подключения была отменена", Result = false };
 			}
 
 			attemptsLeft--;
@@ -77,7 +77,7 @@ public class TcpClientInstance : IUpClient
 				catch (TaskCanceledException)
 				{
 					_logger.LogInformation("Перезагрузка попыток подключения была отменена.");
-					return new ResponceIntegration { Message = "Перезагрузка попыток подключения была отменена", Result = false };
+					return new ResponseIntegration { Message = "Перезагрузка попыток подключения была отменена", Result = false };
 				}
 				attemptsLeft = maxAttempts; // Сбросить счетчик попыток
 			}
@@ -85,7 +85,7 @@ public class TcpClientInstance : IUpClient
 
 		// Лаконичное сообщение после всех неудачных попыток
 		_logger.LogError($"Не удалось подключиться к {serverHost}:{serverPort} после {maxAttempts} попыток.");
-		return new ResponceIntegration { Message = "Не удалось подключиться", Result = false };
+		return new ResponseIntegration { Message = "Не удалось подключиться", Result = false };
 	}
 
 

@@ -1,13 +1,13 @@
 ﻿using System.Text.Json;
-using servers_api.models.responces;
-using servers_api.servicehandlers;
+using servers_api.handlers;
+using servers_api.models.response;
 using servers_api.services.brokers.bpmintegration;
 using servers_api.services.brokers.tcprest;
 using servers_api.Services.Connectors;
 using servers_api.Services.InternalSystems;
 using servers_api.Services.Parsers;
 
-namespace servers_api.Patterns
+namespace servers_api.main
 {
 	/// <summary>
 	/// Общий менеджер-сервис, занимающийся процессингом настройки
@@ -40,7 +40,7 @@ namespace servers_api.Patterns
 			_logger = logger;
 		}
 
-		public async Task<List<ResponceIntegration>> ConfigureAsync(
+		public async Task<List<ResponseIntegration>> ConfigureAsync(
 			JsonElement jsonBody,
 			CancellationToken stoppingToken)
 		{

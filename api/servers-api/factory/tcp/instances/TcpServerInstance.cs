@@ -1,10 +1,10 @@
 ﻿using System.Net.Sockets;
 using System.Net;
 using servers_api.factory.abstractions;
-using servers_api.models.responces;
 using servers_api.models.internallayer.instance;
-using servers_api.messaginghandlers.sending;
 using servers_api.validation;
+using servers_api.messaging.sending;
+using servers_api.models.response;
 
 namespace servers_api.factory.tcp.instances
 {
@@ -28,7 +28,7 @@ namespace servers_api.factory.tcp.instances
 			_logger = logger;
 		}
 
-		public async Task<ResponceIntegration> UpServerAsync(
+		public async Task<ResponseIntegration> UpServerAsync(
 				ServerInstanceModel instanceModel,
 				CancellationToken cancellationToken = default)
 		{
@@ -55,7 +55,7 @@ namespace servers_api.factory.tcp.instances
 						// TODO параметр модели нужно пробросить при настройке динамического шлюза, а не хардкодить:
 						_ = Task.Run(() => _messageSender.SendMessagesToClientAsync(client, instanceModel.OutQueueName, cancellationToken), cancellationToken);
 
-						return new ResponceIntegration
+						return new ResponseIntegration
 						{
 							Message = "Сервер запущен и клиент подключен.",
 							Result = true
@@ -68,12 +68,12 @@ namespace servers_api.factory.tcp.instances
 					}
 				}
 
-				return new ResponceIntegration { Message = "Не удалось подключиться после нескольких попыток.", Result = false };
+				return new ResponseIntegration { Message = "Не удалось подключиться после нескольких попыток.", Result = false };
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Критическая ошибка при запуске сервера.");
-				return new ResponceIntegration { Message = "Критическая ошибка сервера.", Result = false };
+				return new ResponseIntegration { Message = "Критическая ошибка сервера.", Result = false };
 			}
 		}
 	}

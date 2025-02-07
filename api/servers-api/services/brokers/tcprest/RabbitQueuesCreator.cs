@@ -1,5 +1,6 @@
 ﻿using RabbitMQ.Client;
 using servers_api.models.responces;
+using servers_api.models.response;
 using servers_api.services.brokers.tcprest;
 
 public class RabbitQueuesCreator : IRabbitQueuesCreator
@@ -13,7 +14,7 @@ public class RabbitQueuesCreator : IRabbitQueuesCreator
 		_connectionFactory = connectionFactory;
 	}
 
-	public async Task<ResponceIntegration> CreateQueuesAsync(string queueIn, string queueOut)
+	public async Task<ResponseIntegration> CreateQueuesAsync(string queueIn, string queueOut)
 	{
 		_logger.LogInformation("Создание очередей {QueueIn} и {QueueOut}", queueIn, queueOut);
 
@@ -27,7 +28,7 @@ public class RabbitQueuesCreator : IRabbitQueuesCreator
 				DeclareQueue(channel, queueIn);
 				DeclareQueue(channel, queueOut);
 
-				return new ResponceQueuesIntegration
+				return new ResponseQueuesIntegration
 				{
 					Message = $"Очереди '{queueIn}' и '{queueOut}' успешно созданы.",
 					Result = true,
@@ -38,7 +39,7 @@ public class RabbitQueuesCreator : IRabbitQueuesCreator
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, "Ошибка при создании очередей {QueueIn} и {QueueOut}", queueIn, queueOut);
-			return new ResponceQueuesIntegration { Message = ex.Message, Result = false };
+			return new ResponseQueuesIntegration { Message = ex.Message, Result = false };
 		}
 	}
 

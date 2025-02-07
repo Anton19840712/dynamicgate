@@ -1,5 +1,5 @@
 ﻿using servers_api.models.internallayer.instance;
-using servers_api.models.responces;
+using servers_api.models.response;
 
 namespace servers_api.factory.abstractions
 {
@@ -8,7 +8,7 @@ namespace servers_api.factory.abstractions
 	/// </summary>
 	public interface IUpClient
 	{
-		Task<ResponceIntegration> ConnectToServerAsync(
+		Task<ResponseIntegration> ConnectToServerAsync(
 			ClientInstanceModel instanceModel,
 			string serverHost,
 			int serverPort,

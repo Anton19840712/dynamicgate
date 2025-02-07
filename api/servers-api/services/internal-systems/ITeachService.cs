@@ -1,5 +1,5 @@
 ﻿using servers_api.models.internallayer.common;
-using servers_api.models.responces;
+using servers_api.models.response;
 
 namespace servers_api.Services.InternalSystems
 {
@@ -9,6 +9,6 @@ namespace servers_api.Services.InternalSystems
 	/// </summary>
 	public interface ITeachService
 	{
-		Task<ResponceIntegration> TeachBPMNAsync(CombinedModel model, CancellationToken token);
+		Task<ResponseIntegration> TeachBPMNAsync(CombinedModel model, CancellationToken token);
 	}
 }

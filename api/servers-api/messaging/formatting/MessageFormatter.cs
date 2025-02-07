@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace servers_api.messaginghandlers.formatting
+namespace servers_api.messaging.formatting
 {
 	public class MessageFormatter : IMessageFormatter
 	{

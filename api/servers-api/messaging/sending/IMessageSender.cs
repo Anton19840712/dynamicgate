@@ -1,6 +1,6 @@
 ﻿using System.Net.Sockets;
 
-namespace servers_api.messaginghandlers.sending
+namespace servers_api.messaging.sending
 {
 	public interface IMessageSender
 	{

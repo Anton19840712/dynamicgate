@@ -1,5 +1,5 @@
 ﻿using servers_api.models.internallayer.instance;
-using servers_api.models.responces;
+using servers_api.models.response;
 
 namespace servers_api.factory.abstractions
 {
@@ -18,7 +18,7 @@ namespace servers_api.factory.abstractions
 			_logger = logger;
 		}
 
-		public async Task<ResponceIntegration> ConfigureAsync(InstanceModel instanceModel)
+		public async Task<ResponseIntegration> ConfigureAsync(InstanceModel instanceModel)
 		{
 			if (instanceModel is ClientInstanceModel clientModel)
 			{
@@ -29,14 +29,14 @@ namespace servers_api.factory.abstractions
 				return await ConfigureServerAsync(serverModel);
 			}
 
-			return new ResponceIntegration
+			return new ResponseIntegration
 			{
 				Message = "Неизвестный тип инстанса",
 				Result = false
 			};
 		}
 
-		private async Task<ResponceIntegration> ConfigureClientAsync(ClientInstanceModel clientModel)
+		private async Task<ResponseIntegration> ConfigureClientAsync(ClientInstanceModel clientModel)
 		{
 			var client = _protocolFactory.CreateClient();
 
@@ -50,7 +50,7 @@ namespace servers_api.factory.abstractions
 			return await client.ConnectToServerAsync(clientModel, serverHost, serverPort, cts.Token);
 		}
 
-		private async Task<ResponceIntegration> ConfigureServerAsync(ServerInstanceModel serverModel)
+		private async Task<ResponseIntegration> ConfigureServerAsync(ServerInstanceModel serverModel)
 		{
 			var server = _protocolFactory.CreateServer();
 			_logger.LogInformation("Запуск сервера {Protocol} на {Host}:{Port}",

@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using servers_api.models.internallayer.common;
 using servers_api.models.queues;
-using servers_api.models.responces;
+using servers_api.models.response;
 
 namespace servers_api.Services.InternalSystems
 {
@@ -22,7 +22,7 @@ namespace servers_api.Services.InternalSystems
 			_logger = logger;
 		}
 
-		public async Task<ResponceIntegration> TeachBPMNAsync(CombinedModel parsedModel, CancellationToken token)
+		public async Task<ResponseIntegration> TeachBPMNAsync(CombinedModel parsedModel, CancellationToken token)
 		{
 			_logger.LogInformation("Начало обработки TeachBPMNAsync");
 
@@ -56,7 +56,7 @@ namespace servers_api.Services.InternalSystems
 				if (response.IsSuccessStatusCode)
 				{
 					_logger.LogInformation("Соединение успешно установлено с API, статус-код: {StatusCode}", response.StatusCode);
-					return new ResponceIntegration
+					return new ResponseIntegration
 					{
 						Message = "API доступен, соединение успешно установлено.",
 						Result = true
@@ -65,7 +65,7 @@ namespace servers_api.Services.InternalSystems
 				else
 				{
 					_logger.LogWarning("API недоступен, статус-код: {StatusCode}", response.StatusCode);
-					return new ResponceIntegration
+					return new ResponseIntegration
 					{
 						Message = $"API недоступен. Статус-код: {(int)response.StatusCode}",
 						Result = false
@@ -75,7 +75,7 @@ namespace servers_api.Services.InternalSystems
 			catch (HttpRequestException ex)
 			{
 				_logger.LogError(ex, "Ошибка при обращении к API");
-				return new ResponceIntegration
+				return new ResponseIntegration
 				{
 					Message = $"Ошибка при обращении к API: {ex.Message}",
 					Result = false
@@ -84,7 +84,7 @@ namespace servers_api.Services.InternalSystems
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Неожиданная ошибка при проверке статуса API");
-				return new ResponceIntegration
+				return new ResponseIntegration
 				{
 					Message = $"Неожиданная ошибка при проверке статуса API: {ex.Message}",
 					Result = false
