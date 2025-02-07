@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using servers_api.models.responces;
 
-namespace servers_api.Handlers
+namespace servers_api.servicehandlers
 {
 	/// <summary>
 	/// Класс занимается валидацией результатов каждого из процессов настройки интеграции.
