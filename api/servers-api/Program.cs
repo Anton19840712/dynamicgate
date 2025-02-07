@@ -30,9 +30,11 @@ try
 	services.AddFactoryServices();
 	services.AddApiServices();
 	services.AddRabbitMqServices(configuration);
+	services.AddMessageServingServices();
 	services.AddMongoDbServices(configuration);
 	services.AddAutoMapper(typeof(MappingProfile));
 	services.AddOutboxServices();
+	services.AddValidationServices();
 
 	var app = builder.Build();
 
