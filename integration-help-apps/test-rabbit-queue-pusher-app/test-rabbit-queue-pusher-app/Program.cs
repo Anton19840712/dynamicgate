@@ -5,7 +5,7 @@ using RabbitMQ.Client;
 class Program
 {
 	private const string RabbitMqHost = "localhost"; // Хост RabbitMQ
-	private const string QueueName = "test_queue"; // Название очереди
+	private const string QueueName = "corporation_out"; // Название очереди
 	private static readonly TimeSpan SendInterval = TimeSpan.FromSeconds(2); // Интервал отправки
 
 	static async Task Main()
