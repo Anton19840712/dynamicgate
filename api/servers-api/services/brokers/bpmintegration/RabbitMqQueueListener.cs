@@ -3,7 +3,13 @@ using RabbitMQ.Client;
 using servers_api.models.responces;
 using System.Text;
 using servers_api.services.brokers.bpmintegration;
+using System.Collections.Concurrent;
 
+/// <summary>
+/// RabbitMqQueueListener с использованием промежуточной конкурентной коллекции с накоплением сообщений и последующей выдачей в созданный объект сервера.
+/// Можно было передавать промежуточно поточно с использованием различных решений,
+/// но это оказалось наиболее коротким. В зависимости от поведения системы возможно добавление раличных реализаций: networkstream, kafka, database and outbox. Но они на данный mvp момент излишни.
+/// </summary>
 public class RabbitMqQueueListener : IRabbitMqQueueListener
 {
 	private readonly IConnectionFactory _connectionFactory;
@@ -11,7 +17,7 @@ public class RabbitMqQueueListener : IRabbitMqQueueListener
 	private IConnection _connection;
 	private IModel _channel;
 	private string _queueName;
-	private readonly List<ResponceIntegration> _collectedMessages = new();
+	private readonly ConcurrentQueue<ResponceIntegration> _collectedMessages = new();
 
 	public RabbitMqQueueListener(IConnectionFactory connectionFactory, ILogger<RabbitMqQueueListener> logger)
 	{
@@ -55,10 +61,7 @@ public class RabbitMqQueueListener : IRabbitMqQueueListener
 
 		_logger.LogInformation("Получено сообщение из очереди {Queue}: {Message}", _queueName, message);
 
-		lock (_collectedMessages)
-		{
-			_collectedMessages.Add(new ResponceIntegration { Message = message, Result = true });
-		}
+		_collectedMessages.Enqueue(new ResponceIntegration { Message = message, Result = true });
 
 		return Task.CompletedTask;
 	}
@@ -72,11 +75,11 @@ public class RabbitMqQueueListener : IRabbitMqQueueListener
 
 	public List<ResponceIntegration> GetCollectedMessages()
 	{
-		lock (_collectedMessages)
+		var messagesList = new List<ResponceIntegration>();
+		while (_collectedMessages.TryDequeue(out var message))
 		{
-			var messagesCopy = new List<ResponceIntegration>(_collectedMessages);
-			_collectedMessages.Clear(); // Очищаем после выдачи
-			return messagesCopy;
+			messagesList.Add(message);
 		}
+		return messagesList;
 	}
 }
