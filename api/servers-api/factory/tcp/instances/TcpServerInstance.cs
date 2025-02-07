@@ -9,7 +9,7 @@ using servers_api.models.response;
 namespace servers_api.factory.tcp.instances
 {
 	/// <summary>
-	/// Tcp сервер, который продолжает отправлять сообщения после возврата ResponceIntegration.
+	/// Tcp сервер, который продолжает отправлять сообщения после возврата ResponseIntegration.
 	/// </summary>
 	public class TcpServerInstance : IUpServer
 	{

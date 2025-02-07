@@ -37,20 +37,20 @@ public class SenderService : ISenderService
 			_logger.LogInformation("Настройка клиента с хостом {Host} и портом {Port}", clientModel.ClientHost, clientModel.ClientPort);
 
 			// Передаем всю модель в метод ConfigureAsync
-			var responceIntegration = await _protocolManager.ConfigureAsync(
+			var responseIntegration = await _protocolManager.ConfigureAsync(
 				clientModel);
 
-			return responceIntegration;
+			return responseIntegration;
 		}
 		else if (instanceModel is ServerInstanceModel serverModel)
 		{
 			_logger.LogInformation("Настройка сервера с хостом {Host} и портом {Port}", serverModel.Host, serverModel.Port);
 
 			// Передаем всю модель в метод ConfigureAsync
-			var responceIntegration = await _protocolManager.ConfigureAsync(
+			var responseIntegration = await _protocolManager.ConfigureAsync(
 				serverModel);
 
-			return responceIntegration;
+			return responseIntegration;
 		}
 
 		return new ResponseIntegration

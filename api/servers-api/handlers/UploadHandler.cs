@@ -16,7 +16,7 @@ namespace servers_api.handlers
 		/// <param name="senderConnectionTask">Результат задачи соединения согласно выбранного протокола</param>
 		/// <param name="pushTask">Результат задачи обучения BPM</param>
 		/// <param name="receiveTask">Результат задачи получения данных из BPM</param>
-		/// <returns>Список объектов ResponceIntegration с результатами каждого процесса</returns>
+		/// <returns>Список объектов ResponseIntegration с результатами каждого процесса</returns>
 		public List<ResponseIntegration> GenerateResultMessage(
 					ResponseIntegration queueCreationTask = null,
 					ResponseIntegration senderConnectionTask = null,
@@ -36,7 +36,7 @@ namespace servers_api.handlers
 
 			foreach (var (processName, response) in results)
 			{
-				// Генерируем объект ResponceIntegration для каждого процесса
+				// Генерируем объект ResponseIntegration для каждого процесса
 				var resultMessage = new StringBuilder();
 				if (response == null)
 				{
@@ -61,7 +61,7 @@ namespace servers_api.handlers
 				});
 			}
 
-			// Возвращаем список объектов ResponceIntegration с результатами каждого процесса
+			// Возвращаем список объектов ResponseIntegration с результатами каждого процесса
 			return responseList;
 		}
 	}
