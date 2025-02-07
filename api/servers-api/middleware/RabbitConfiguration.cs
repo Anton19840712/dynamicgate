@@ -9,7 +9,7 @@ using servers_api.services.brokers.tcprest;
 public static class RabbitConfiguration
 {
 	/// <summary>
-	/// Регистрация RabbitMQ сервисов
+	/// Регистрация RabbitMQ сервисов.
 	/// </summary>
 	public static IServiceCollection AddRabbitMqServices(this IServiceCollection services, IConfiguration configuration)
 	{

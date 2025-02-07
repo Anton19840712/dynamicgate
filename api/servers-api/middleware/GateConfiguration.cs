@@ -2,6 +2,10 @@
 
 namespace servers_api.middleware
 {
+	/// <summary>
+	/// Класс используется для предоставления возможности настройщику системы
+	/// динамически задавать хост и порт самого динамического шлюза.
+	/// </summary>
 	public static class GateConfiguration
 	{
 		public static void ConfigureDynamicGate(string[] args, WebApplicationBuilder builder)

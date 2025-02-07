@@ -1,6 +1,6 @@
 ﻿using Serilog;
-using servers_api.Handlers;
 using servers_api.Patterns;
+using servers_api.servicehandlers;
 using servers_api.Services.Connectors;
 using servers_api.Services.InternalSystems;
 using servers_api.Services.Parsers;
@@ -10,7 +10,7 @@ namespace servers_api.middleware
 	static class IntegrationConfiguration
 	{
 		/// <summary>
-		/// Регистрация API сервисов
+		/// Регистрация API сервисов, участвующих в процессе интеграции.
 		/// </summary>
 		public static IServiceCollection AddApiServices(this IServiceCollection services)
 		{

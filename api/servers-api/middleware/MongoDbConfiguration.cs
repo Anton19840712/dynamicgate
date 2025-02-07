@@ -1,6 +1,5 @@
 ﻿using MongoDB.Driver;
 using Serilog;
-using servers_api.repositories;
 using System.Security.Authentication;
 
 namespace servers_api.middleware
@@ -8,7 +7,7 @@ namespace servers_api.middleware
 	static class MongoDbConfiguration
 	{
 		/// <summary>
-		/// Регистрация MongoDB клиента
+		/// Регистрация MongoDB клиента и связная с работой с данной базой логика.
 		/// </summary>
 		public static IServiceCollection AddMongoDbServices(this IServiceCollection services, IConfiguration configuration)
 		{
@@ -38,8 +37,6 @@ namespace servers_api.middleware
 			});
 
 			Log.Information("MongoDB зарегистрирован.");
-
-			services.AddSingleton<IOutboxRepository, MongoOutboxRepository>();
 
 			return services;
 		}
