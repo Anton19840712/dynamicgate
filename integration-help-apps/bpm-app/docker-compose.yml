@@ -1,0 +1,25 @@
+services:
+  cardsystem:
+    image: ${DOCKER_REGISTRY-}cardsystem
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/fullchain.cer
+    volumes:
+      - ~/.aspnet/https:/home/user/fullchain.cer/
+      - ~/.aspnet/https:/home/user/*.pit,protei.ru.key/
+    ports:
+      - 443
+    build:
+      context: .
+      dockerfile: CardSystem/Dockerfile
+
+  bpmsystem:
+    image: ${DOCKER_REGISTRY-}bpmsystem
+    volumes:
+      - /home/user/fullchain.cer/:/home/user/fullchain.cer/
+    build:
+      context: .
+      dockerfile: BPM/BPMSystem/Dockerfile
+

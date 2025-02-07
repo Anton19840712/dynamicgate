@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35208.52
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPMSystem", "BPM\BPMSystem\BPMSystem.csproj", "{562F7CFD-0F4C-4F28-8E61-C745D636837D}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{93052E2C-063F-4E63-B722-1A9C73E46A45}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BPMIntegration", "BPM\BPMIntegration\BPMIntegration.csproj", "{44D56EB2-60A0-4824-9E94-CAD66A9124C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPMEngine", "BPM\BPMEngine\BPMEngine.csproj", "{D6AC7ACC-9480-4F38-A72C-B012A9D90FD7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{562F7CFD-0F4C-4F28-8E61-C745D636837D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{562F7CFD-0F4C-4F28-8E61-C745D636837D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{562F7CFD-0F4C-4F28-8E61-C745D636837D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{562F7CFD-0F4C-4F28-8E61-C745D636837D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93052E2C-063F-4E63-B722-1A9C73E46A45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93052E2C-063F-4E63-B722-1A9C73E46A45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93052E2C-063F-4E63-B722-1A9C73E46A45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93052E2C-063F-4E63-B722-1A9C73E46A45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44D56EB2-60A0-4824-9E94-CAD66A9124C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44D56EB2-60A0-4824-9E94-CAD66A9124C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44D56EB2-60A0-4824-9E94-CAD66A9124C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44D56EB2-60A0-4824-9E94-CAD66A9124C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6AC7ACC-9480-4F38-A72C-B012A9D90FD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6AC7ACC-9480-4F38-A72C-B012A9D90FD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6AC7ACC-9480-4F38-A72C-B012A9D90FD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6AC7ACC-9480-4F38-A72C-B012A9D90FD7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DB1E5109-E7A7-45DE-A3E4-5E5CE1CF756B}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,14 @@
+**/.vs
+gitignore
+target/
+output/
+release/
+debug/
+bin
+**/obj
+*~
+*.pdb
+*.exe
+*.dll
+*.pubxml*
+*.pubxml
