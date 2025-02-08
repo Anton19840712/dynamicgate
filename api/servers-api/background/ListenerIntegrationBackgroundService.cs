@@ -9,12 +9,12 @@
 	/// <summary>
 	/// Фоновый процесс, который запускается на старте приложения и создает очередь, из которой будет слушать входящие сообщения при настройке интеграции.
 	/// </summary>
-	public class ListenerIntegrationService : BackgroundService
+	public class ListenerIntegrationBackgroundService : BackgroundService
 	{
 		private readonly IRabbitMqService _rabbitMqService;
-		private readonly ILogger<ListenerIntegrationService> _logger;
+		private readonly ILogger<ListenerIntegrationBackgroundService> _logger;
 
-		public ListenerIntegrationService(IRabbitMqService rabbitMqService, ILogger<ListenerIntegrationService> logger)
+		public ListenerIntegrationBackgroundService(IRabbitMqService rabbitMqService, ILogger<ListenerIntegrationBackgroundService> logger)
 		{
 			_rabbitMqService = rabbitMqService;
 			_logger = logger;

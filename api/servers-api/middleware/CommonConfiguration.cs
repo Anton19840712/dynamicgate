@@ -13,7 +13,7 @@ namespace servers_api.middleware
 			Log.Information("Регистрация базовых сервисов...");
 
 			services.AddCors();
-			services.AddHostedService<ListenerIntegrationService>();
+			services.AddHostedService<ListenerIntegrationBackgroundService>();
 
 			Log.Information("Базовые сервисы зарегистрированы.");
 

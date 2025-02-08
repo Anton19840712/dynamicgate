@@ -2,16 +2,16 @@
 
 namespace servers_api.background
 {
-	public class OutboxService : BackgroundService
+	public class OutboxBackgroundService : BackgroundService
 	{
 		private readonly IOutboxRepository _outboxRepository;
 		private readonly IRabbitMqService _rabbitMqService;
-		private readonly ILogger<OutboxService> _logger;
+		private readonly ILogger<OutboxBackgroundService> _logger;
 
-		public OutboxService(
+		public OutboxBackgroundService(
 			IOutboxRepository outboxRepository,
 			IRabbitMqService rabbitMqService,
-			ILogger<OutboxService> logger)
+			ILogger<OutboxBackgroundService> logger)
 		{
 			_outboxRepository = outboxRepository;
 			_rabbitMqService = rabbitMqService;

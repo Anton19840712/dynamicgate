@@ -14,7 +14,7 @@ namespace servers_api.middleware
 			Log.Information("Регистрация OutboxProcessor...");
 
 			// Регистрируем как IHostedService для фонового выполнения
-			services.AddHostedService<OutboxService>();
+			services.AddHostedService<OutboxBackgroundService>();
 			services.AddSingleton<IOutboxRepository, MongoOutboxRepository>();
 
 			Log.Information("OutboxProcessor зарегистрирован.");
