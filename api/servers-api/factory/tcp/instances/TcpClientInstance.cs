@@ -1,24 +1,17 @@
-﻿using System.Net.Sockets;
-using System.Text;
-using servers_api.factory.abstractions;
+﻿using servers_api.factory.abstractions;
+using servers_api.factory.tcp.handlers;
 using servers_api.models.internallayer.instance;
-using servers_api.models.outbox;
 using servers_api.models.response;
-using servers_api.repositories;
 
 public class TcpClientInstance : IUpClient
 {
 	private readonly ILogger<TcpClientInstance> _logger;
-	private TcpClient _client;
-	private NetworkStream _stream;
-	private string _serverHost;
-	private int _serverPort;
-	private CancellationTokenSource _cts;
-	private IOutboxRepository _outboxRepository;
-	public TcpClientInstance(ILogger<TcpClientInstance> logger, IOutboxRepository outboxRepository)
+	private readonly ITcpClientHandler _helper;
+
+	public TcpClientInstance(ILogger<TcpClientInstance> logger, ITcpClientHandler helper)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-		_outboxRepository = outboxRepository ?? throw new ArgumentNullException(nameof(outboxRepository));
+		_helper = helper ?? throw new ArgumentNullException(nameof(helper));
 	}
 
 	public async Task<ResponseIntegration> ConnectToServerAsync(
@@ -27,202 +20,48 @@ public class TcpClientInstance : IUpClient
 		int serverPort,
 		CancellationToken token)
 	{
-		_serverHost = serverHost;
-		_serverPort = serverPort;
-		_cts = CancellationTokenSource.CreateLinkedTokenSource(token);
-
 		int maxAttempts = instanceModel.ClientConnectionSettings.AttemptsToFindExternalServer;
 		int timeout = instanceModel.ClientConnectionSettings.ConnectionTimeoutMs;
-		int retryDelay = instanceModel.ClientConnectionSettings.RetryDelayMs; // Задержка между повторными попытками
+		int retryDelay = instanceModel.ClientConnectionSettings.RetryDelayMs;
 
-		int attemptsLeft = maxAttempts;
-		while (attemptsLeft > 0)
+		while (!token.IsCancellationRequested)
 		{
-			// Логируем номер оставшихся попыток
-			_logger.LogInformation($"Попытка подключения к {serverHost}:{serverPort} ({attemptsLeft} из {maxAttempts})...");
-
-			if (await TryConnectAsync(instanceModel))
+			for (int attempt = 1; attempt <= maxAttempts; attempt++)
 			{
-				// Успешное подключение
-				_logger.LogInformation($"Подключение к {serverHost}:{serverPort} установлено.");
-				_ = Task.Run(MonitorConnectionAsync, _cts.Token);
-				return new ResponseIntegration { Message = "Успешное подключение", Result = true };
-			}
+				_logger.LogInformation($"[{attempt}/{maxAttempts}] Подключение к {serverHost}:{serverPort}...");
 
-			// Лаконичное сообщение при неудаче
-			_logger.LogWarning($"Ошибка подключения. Ожидайте {timeout} мс перед следующей попыткой...");
-			try
-			{
-				// Задержка перед следующей попыткой
-				await Task.Delay(timeout, token);
-			}
-			catch (TaskCanceledException)
-			{
-				// Обработка отмены операции (если задача отменена извне)
-				_logger.LogInformation("Попытка подключения была отменена.");
-				return new ResponseIntegration { Message = "Попытка подключения была отменена", Result = false };
-			}
+				if (await _helper.TryConnectAsync(serverHost, serverPort, token, instanceModel).ConfigureAwait(false))
+				{
+					_logger.LogInformation($"Подключение к {serverHost}:{serverPort} успешно.");
+					_ = Task.Run(() => _helper.MonitorConnectionAsync(token), token);
+					return new ResponseIntegration { Message = "Успешное подключение", Result = true };
+				}
 
-			attemptsLeft--;
-
-			// Если попытки закончились, подождать retryDelay и начать заново
-			if (attemptsLeft == 0)
-			{
-				_logger.LogInformation($"Не удалось подключиться после {maxAttempts} попыток. Повтор через {retryDelay} мс.");
+				_logger.LogWarning($"Попытка подключения не удалась. Повтор через {timeout} мс...");
 				try
 				{
-					// Задержка перед повтором всех попыток
-					await Task.Delay(retryDelay, token); // Задержка перед повтором всех попыток
+					await Task.Delay(timeout, token).ConfigureAwait(false);
 				}
 				catch (TaskCanceledException)
 				{
-					_logger.LogInformation("Перезагрузка попыток подключения была отменена.");
-					return new ResponseIntegration { Message = "Перезагрузка попыток подключения была отменена", Result = false };
+					_logger.LogInformation("Подключение отменено.");
+					return new ResponseIntegration { Message = "Попытка подключения отменена", Result = false };
 				}
-				attemptsLeft = maxAttempts; // Сбросить счетчик попыток
 			}
-		}
 
-		// Лаконичное сообщение после всех неудачных попыток
-		_logger.LogError($"Не удалось подключиться к {serverHost}:{serverPort} после {maxAttempts} попыток.");
-		return new ResponseIntegration { Message = "Не удалось подключиться", Result = false };
-	}
-
-
-	private async Task<bool> TryConnectAsync(ClientInstanceModel instanceModel = null)
-	{
-		try
-		{
-			_client?.Close();
-			_client = new TcpClient();
-
-			BindLocalEndpoint(instanceModel);
-			await _client.ConnectAsync(_serverHost, _serverPort);
-
-			if (_client.Connected)
-			{
-				_stream = _client.GetStream();
-				await SendWelcomeMessageAsync();
-				_ = Task.Run(() => ReceiveMessagesAsync(_cts.Token), _cts.Token);
-				return true;
-			}
-		}
-		catch (SocketException ex)
-		{
-			// Лаконичное логирование ошибки подключения
-			_logger.LogError(ex, $"Ошибка подключения к {_serverHost}:{_serverPort}. Повторная попытка...");
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Ошибка подключения.");
-		}
-		return false;
-	}
-
-
-	private void BindLocalEndpoint(ClientInstanceModel instanceModel)
-	{
-		if (!string.IsNullOrEmpty(instanceModel?.ClientHost) && instanceModel.ClientPort > 0)
-		{
-			var localEndPoint = new System.Net.IPEndPoint(
-				System.Net.IPAddress.Parse(instanceModel.ClientHost),
-				instanceModel.ClientPort);
-
-			_logger.LogInformation($"Привязываем клиента к локальному адресу {localEndPoint}");
-			_client.Client.Bind(localEndPoint);
-			_logger.LogInformation($"Фактический локальный адрес: {_client.Client.LocalEndPoint}");
-		}
-	}
-
-	private async Task SendWelcomeMessageAsync()
-	{
-		try
-		{
-			if (_client?.Connected == true)
-			{
-				byte[] data = Encoding.UTF8.GetBytes("привет от tcp клиента");
-				await _stream.WriteAsync(data, 0, data.Length);
-				_logger.LogInformation("Отправлено приветственное сообщение серверу.");
-			}
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, "Ошибка при отправке приветственного сообщения.");
-		}
-	}
-
-	private async Task ReceiveMessagesAsync(CancellationToken token)
-	{
-		var buffer = new byte[1024];
-		_logger.LogInformation("Ожидание сообщений от сервера...");
-
-		while (!token.IsCancellationRequested && _client.Connected)
-		{
+			_logger.LogWarning($"Все попытки ({maxAttempts}) исчерпаны. Повтор через {retryDelay} мс...");
 			try
 			{
-				int bytesRead = await _stream.ReadAsync(buffer, 0, buffer.Length, token);
-				if (bytesRead == 0)
-				{
-					_logger.LogWarning("Соединение закрыто сервером.");
-					break;
-				}
-
-				string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-				_logger.LogInformation($"Получено сообщение от сервера: {message}");
-
-				var outboxMessage = new OutboxMessage
-				{
-					Message = message,
-					Source = $"{_serverHost}:{_serverPort}",
-				};
-
-				// Сохраняем в Outbox
-				await _outboxRepository.SaveMessageAsync(outboxMessage);
-				_logger.LogInformation("Сообщение сохранено в Outbox.");
+				await Task.Delay(retryDelay, token).ConfigureAwait(false);
 			}
-			catch (Exception ex)
+			catch (TaskCanceledException)
 			{
-				_logger.LogError(ex, "Ошибка при чтении данных.");
-				break;
+				_logger.LogInformation("Перезапуск подключения отменен.");
+				return new ResponseIntegration { Message = "Перезапуск подключения отменен", Result = false };
 			}
 		}
 
-		_logger.LogWarning("Клиентское соединение закрыто.");
-		await ReconnectAsync();
-	}
-
-
-	private async Task MonitorConnectionAsync()
-	{
-		while (!_cts.Token.IsCancellationRequested)
-		{
-			await Task.Delay(5000, _cts.Token);
-			if (!_client.Connected)
-			{
-				_logger.LogWarning("Соединение потеряно. Попытка переподключения...");
-				await ReconnectAsync();
-	}
-		}
-	}
-
-	private async Task ReconnectAsync()
-	{
-		_logger.LogInformation("Переподключение к серверу...");
-		while (!_cts.Token.IsCancellationRequested)
-		{
-			if (await TryConnectAsync())
-			{
-				_logger.LogInformation("Успешное восстановление соединения.");
-				return;
-			}
-			await Task.Delay(5000, _cts.Token);
-		}
-	}
-
-	public void Disconnect()
-	{
-		_logger.LogInformation("Отключение клиента...");
-		_cts?.Cancel();
-		_client?.Close();
+		_logger.LogError("Попытки подключения завершены безуспешно.");
+		return new ResponseIntegration { Message = "Не удалось подключиться", Result = false };
 	}
 }
