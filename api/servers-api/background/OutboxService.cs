@@ -28,16 +28,15 @@ namespace servers_api.background
 					var messages = await _outboxRepository.GetUnprocessedMessagesAsync();
 					foreach (var message in messages)
 					{
-						_logger.LogInformation($"Публикация сообщения в RabbitMQ: {message.Message}");
+						_logger.LogInformation($"Публикация сообщения: {message.Message}.");
 
-						// Отправляем в RabbitMQ
-						
+						// Отправляем в RabbitMQ:
 						await _rabbitMqService.PublishMessageAsync("exchange_name_tcp", "routing_key_tcp", message.Message);
 
 						// Помечаем сообщение обработанным
 						// TODO проанализируй, если сообщений накопиться очень много, что будет.
 						await _outboxRepository.MarkMessageAsProcessedAsync(message.Id);
-						_logger.LogInformation("Сообщение обработано и помечено в Outbox.");
+						_logger.LogInformation($"Обработано в Outbox: {message.Message}.");
 					}
 				}
 				catch (Exception ex)
@@ -45,8 +44,8 @@ namespace servers_api.background
 					_logger.LogError(ex, "Ошибка при обработке Outbox.");
 				}
 
-				// Ожидаем 5 секунд перед следующим циклом
-				await Task.Delay(5000, token);
+				// Ожидаем 2 секунды перед следующим циклом
+				await Task.Delay(2000, token);
 			}
 		}
 	}

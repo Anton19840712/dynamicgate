@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using servers_api.factory.abstractions;
+using servers_api.factory.tcp.handlers;
 using servers_api.factory.tcp.instances;
 
 namespace servers_api.middleware
@@ -19,6 +20,7 @@ namespace servers_api.middleware
 			//TCP:
 			services.AddTransient<TcpServerInstance>();
 			services.AddTransient<TcpClientInstance>();
+			services.AddTransient<ITcpClientHandler, TcpClientHandler>();
 
 			Log.Information("Factory сервисы зарегистрированы.");
 

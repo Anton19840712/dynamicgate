@@ -28,7 +28,7 @@ class Program
 			int messageCount = 1; // Счётчик сообщений
 			while (true)
 			{
-				string message = $"Привет от сервера! Сообщение номер {messageCount}";
+				string message = $"Test message {messageCount}";
 				byte[] data = Encoding.UTF8.GetBytes(message);
 				await stream.WriteAsync(data, 0, data.Length);
 				Console.WriteLine($"Отправлено сообщение номер {messageCount}");
